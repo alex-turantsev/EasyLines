@@ -59,9 +59,12 @@ public class GridItem : MonoBehaviour {
 	}
 
 	public void Selected(bool selected){
-		selectedSprite.SetActive (selected);
-		selected = selected;
-		Grid.selectedItems.Add (this);
+		if (this.selected != selected) {
+			selectedSprite.SetActive (selected);
+			this.selected = selected;
+			if(selected)
+				Grid.selectedItems.Add (this);
+		}
 	}
 
 	public static bool isNearestItems(GridItem a, GridItem b){

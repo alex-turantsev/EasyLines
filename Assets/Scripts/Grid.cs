@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 public class Grid : MonoBehaviour {
+	public static Grid instance;
 	public int xSize, ySize;
 	public float itemWidth = 1f;
 	private GameObject[] _items;
@@ -15,6 +16,7 @@ public class Grid : MonoBehaviour {
 	public static int selectedId;
 
 	private void Start () {
+		instance = this;
 		GetItems ();
 		FillGrid ();
 		GridItem.OnMouseDownItemEventHandler += OnMouseDownItem;
@@ -30,10 +32,8 @@ public class Grid : MonoBehaviour {
 		}
 	}
 
-	private void Update(){
-		if (Input.GetMouseButtonUp (0)) {
-			//OnMouseUp();
-		}
+	public void RefreshGrid(){
+		Application.LoadLevel(Application.loadedLevel);
 	}
 	
 	public void DeselectAll(){
@@ -41,7 +41,9 @@ public class Grid : MonoBehaviour {
 			g.SetInactive(false);
 		}
 		for (var i = 0; i < selectedItems.Count; i++) {
-			selectedItems[i].Selected(false);
+		}
+		foreach (var g in selectedItems) {
+			g.Selected(false);
 		}
 		selectedItems.Clear ();
 	}
@@ -63,20 +65,77 @@ public class Grid : MonoBehaviour {
 			}
 			//if items id is right and line consist of 4 and more items, destroy them
 			selectedMode = false;
-			DeselectAll();
+			for(var i = selectedItems.Count - 1; i >= 0; i--){
+				var gridItem = selectedItems[i];
+				selectedItems.RemoveAt(i);
+				_gridItems[gridItem.x,gridItem.y] = null;
+				Destroy(gridItem.gameObject);
+			}
+			FillEmptinessAndGenerateNew();
+			//DeselectAll();
 
 			return;
+		}
+	}
+
+	//todo check when @null item null@
+	private void FillEmptinessAndGenerateNew(){
+		for (var x = 0; x < xSize; x++) {
+			int y = 0;
+			while(y < ySize){
+				if(_gridItems[x,y] != null){
+					y++;
+				} else {
+					var y1 = y;	//y - first null 
+					while(y1 < ySize && _gridItems[x,y1] == null){
+						y1++;
+					}
+					if(y1 < ySize){
+						var y2 = y1; // y1 - first item
+						while(y2 < ySize && _gridItems[x,y2] != null){
+							y2++; // last item in set
+						}
+						if(y2 >= ySize || _gridItems[x,y2] == null)
+							y2--;
+						/*for(int i = y, i1 =0; (i < y1) || (i1 < (y2- y1)); i++, i1++){
+							Debug.Log (x+" "+i +" change on "+x+" "+(y1+i1));
+							_gridItems[x,i] = _gridItems[x,y1+i1];
+							_gridItems[x,i].OnItemPositionChanged(x,i);
+						}*/
+						Debug.Log (y+" "+y1+" "+y2);
+						for(var i1 =0; i1 < (y2- y1+1); i1++){
+							Debug.Log (x+" "+(i1+y) +" change on "+x+" "+(y1+i1));
+							_gridItems[x,i1+y] = _gridItems[x,y1+i1];
+							_gridItems[x,i1+y].OnItemPositionChanged(x,i1+y);
+						}
+						y = y1;	
+					}
+				}
+			}
 		}
 	}
 
 	private void OnMouseOverItem(GridItem item){
 		if (!selectedMode || item.inactive)
 			return;
-		var itemS = selectedItems.Last ();
-		if (itemS == item)
+		var lastItem = selectedItems.Last ();
+		if (item == lastItem)
 			return;
-		if (GridItem.isNearestItems (item, itemS)) {
-			item.Selected(true);
+		if (!item.selected) {
+			if (GridItem.isNearestItems (item, lastItem)) {
+				item.Selected (true);
+			}
+		} else {
+			var pos = selectedItems.IndexOf(item);
+			if(selectedItems.Count > (pos + 1)){
+				pos++;
+				var count = selectedItems.Count - pos;
+				var list = selectedItems.GetRange(pos, count);
+				foreach(var g in list){
+					g.Selected(false);
+				}
+				selectedItems.RemoveRange(pos, count);
+			}
 		}
 	}
 

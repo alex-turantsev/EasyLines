@@ -1,10 +1,10 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Grid.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Grid.cs">
     <Files>
-      <File FileName="Assets\Scripts\GridItem.cs" Line="55" Column="25" />
-      <File FileName="Assets\Scripts\Grid.cs" Line="40" Column="34" />
-      <File FileName="Assets\Scripts\TransformExtension.cs" Line="17" Column="23" />
+      <File FileName="Assets/Scripts/GridItem.cs" Line="64" Column="29" />
+      <File FileName="Assets/Scripts/Grid.cs" Line="107" Column="38" />
+      <File FileName="Assets/Scripts/GameGUI.cs" Line="13" Column="2" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
