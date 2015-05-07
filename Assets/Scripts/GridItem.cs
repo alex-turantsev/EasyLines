@@ -17,7 +17,11 @@ public class GridItem : MonoBehaviour {
 	public bool inactive = false;
 
 	public int id;
-	public Rigidbody2D rigid;
+	[HideInInspector]
+	public new Rigidbody2D rigidbody;
+	[HideInInspector]
+	public new Transform transform;
+	[HideInInspector]
 	public SpriteRenderer spriteRenderer;
 	public GameObject selectedSprite;
 
@@ -27,9 +31,12 @@ public class GridItem : MonoBehaviour {
 	public delegate void OnMouseOverItem(GridItem item);
 	public static event OnMouseOverItem OnMouseOverItemEventHandler;
 
-	private void Start(){
-		rigid = gameObject.GetComponent<Rigidbody2D> ();
+	private void Awake(){
+		this.rigidbody = gameObject.GetComponent<Rigidbody2D> ();
+		this.transform = gameObject.GetComponent<Transform> ();
 		spriteRenderer = gameObject.GetComponent<SpriteRenderer> ();
+	}
+	private void Start(){
 		selectedSprite.SetActive (false);
 	}
 

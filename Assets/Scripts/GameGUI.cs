@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class GameGUI : MonoBehaviour {
-
+	public static GameGUI instance;
+	public Text scoreCount;
 	// Use this for initialization
 	void Start () {
 	

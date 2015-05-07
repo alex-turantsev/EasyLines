@@ -10,12 +10,21 @@ public class Grid : MonoBehaviour {
 	private GameObject[] _items;
 	private GridItem[,] _gridItems;
 	private GridItem _currentlySelected;
+	private int score = 0;
 
 	public static List<GridItem> selectedItems = new List<GridItem>();
 	public static bool selectedMode = false;
 	public static int selectedId;
+	public static Transform itemsParent;
 
 	private void Start () {
+		var go = GameObject.Find ("GridGameObject");
+		if (go == null) {
+			Debug.LogError("It must be GridGameObject");
+			return;
+		}
+		itemsParent = go.transform;
+		itemsParent.transform.position = new Vector3 ();
 		instance = this;
 		GetItems ();
 		FillGrid ();
@@ -24,6 +33,7 @@ public class Grid : MonoBehaviour {
 	}
 	
 	private void FillGrid(){
+		itemsParent.transform.position = new Vector3 ((xSize*itemWidth)/-2, 0f);
 		_gridItems = new GridItem[xSize, ySize];
 		for (var x = 0; x < xSize; x++) {
 			for(var y = 0; y < ySize; y++){
@@ -31,8 +41,20 @@ public class Grid : MonoBehaviour {
 			}
 		}
 	}
+	#region Score
+	public void RefreshScore(){
+		score = 0;
+		GameGUI.instance.scoreCount.text = "0";
+	}
+
+	public void AddScore (int score){
+		this.score += score;
+		GameGUI.instance.scoreCount.text = this.score.ToString();
+	}
+	#endregion Score
 
 	public void RefreshGrid(){
+		score = 0;
 		Application.LoadLevel(Application.loadedLevel);
 	}
 	
@@ -48,6 +70,7 @@ public class Grid : MonoBehaviour {
 		selectedItems.Clear ();
 	}
 
+	#region MouseEvents
 	private void OnMouseDownItem(GridItem item){
 		if (!selectedMode) {
 			foreach (var g in _gridItems) {
@@ -77,6 +100,31 @@ public class Grid : MonoBehaviour {
 			return;
 		}
 	}
+
+	private void OnMouseOverItem(GridItem item){
+		if (!selectedMode || item.inactive)
+			return;
+		var lastItem = selectedItems.Last ();
+		if (item == lastItem)
+			return;
+		if (!item.selected) {
+			if (GridItem.isNearestItems (item, lastItem)) {
+				item.Selected (true);
+			}
+		} else {
+			var pos = selectedItems.IndexOf(item);
+			if(selectedItems.Count > (pos + 1)){
+				pos++;
+				var count = selectedItems.Count - pos;
+				var list = selectedItems.GetRange(pos, count);
+				foreach(var g in list){
+					g.Selected(false);
+				}
+				selectedItems.RemoveRange(pos, count);
+			}
+		}
+	}
+	#endregion MouseEvents
 
 	//todo check when @null item null@
 	private void FillEmptinessAndGenerateNew(){
@@ -115,34 +163,12 @@ public class Grid : MonoBehaviour {
 		}
 	}
 
-	private void OnMouseOverItem(GridItem item){
-		if (!selectedMode || item.inactive)
-			return;
-		var lastItem = selectedItems.Last ();
-		if (item == lastItem)
-			return;
-		if (!item.selected) {
-			if (GridItem.isNearestItems (item, lastItem)) {
-				item.Selected (true);
-			}
-		} else {
-			var pos = selectedItems.IndexOf(item);
-			if(selectedItems.Count > (pos + 1)){
-				pos++;
-				var count = selectedItems.Count - pos;
-				var list = selectedItems.GetRange(pos, count);
-				foreach(var g in list){
-					g.Selected(false);
-				}
-				selectedItems.RemoveRange(pos, count);
-			}
-		}
-	}
-
 	private GridItem InstantieItem(int x, int y){
 		var item = _items [Random.Range (0, _items.Length)];
-		var newItem = Instantiate (item, new Vector3 (x * itemWidth, y), Quaternion.identity) as GameObject;
+		var newItem = Instantiate (item, Vector3.zero, Quaternion.identity) as GameObject;
 		var gridItem = newItem.GetComponent<GridItem> ();
+		gridItem.transform.parent = itemsParent;
+		gridItem.transform.localPosition = new Vector3 (x * itemWidth, y);
 		gridItem.OnItemPositionChanged (x, y);
 		return gridItem;
 	}
