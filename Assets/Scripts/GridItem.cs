@@ -2,7 +2,8 @@
 using System.Collections;
 
 public class GridItem : MonoBehaviour {
-	/*public int x {
+	public static bool ready = true;
+	public int x {
 		get;
 		private set;
 	}
@@ -10,12 +11,12 @@ public class GridItem : MonoBehaviour {
 	public int y {
 		get;
 		private set;
-	}*/
-	public int x;
-	public int y;
+	}
+	[HideInInspector]
 	public bool selected = false;
+	[HideInInspector]
 	public bool inactive = false;
-
+	[HideInInspector]
 	public int id;
 	[HideInInspector]
 	public new Rigidbody2D rigidbody;
@@ -23,6 +24,7 @@ public class GridItem : MonoBehaviour {
 	public new Transform transform;
 	[HideInInspector]
 	public SpriteRenderer spriteRenderer;
+
 	public GameObject selectedSprite;
 
 	public delegate void OnMouseDownItem(GridItem item);
@@ -40,6 +42,9 @@ public class GridItem : MonoBehaviour {
 		selectedSprite.SetActive (false);
 	}
 
+	/// <summary>
+	/// set indexes in grid and name
+	/// </summary>
 	public void OnItemPositionChanged(int newx, int newy){
 		x = newx;
 		y = newy;
@@ -47,13 +52,17 @@ public class GridItem : MonoBehaviour {
 	}
 
 	private void OnMouseDown(){
-		Selected (true);
+		if (!ready)
+			return;
+		SetSelected (true);
 		if (OnMouseDownItemEventHandler != null) {
 			OnMouseDownItemEventHandler(this);
 		}
 	}
 
 	private void OnMouseOver(){
+		if (!ready)
+			return;
 		if (OnMouseOverItemEventHandler != null)
 			OnMouseOverItemEventHandler (this);
 	}
@@ -65,7 +74,7 @@ public class GridItem : MonoBehaviour {
 		spriteRenderer.color = new Color (c.r, c.g, c.b, opacity);
 	}
 
-	public void Selected(bool selected){
+	public void SetSelected(bool selected){
 		if (this.selected != selected) {
 			selectedSprite.SetActive (selected);
 			this.selected = selected;
